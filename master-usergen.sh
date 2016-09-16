@@ -29,8 +29,8 @@ CS2800Users(){
 	rm CS2800IDS.txt
 	#reads off from user file
 	USERS=$(cat $1)
-	instruct=starkey
-	ipasswd=clarks9gables
+	instruct=demo
+	ipasswd=demo
 	#ta=name
 	#tapasswd=pwgen 5 1
 	for user in $USERS
@@ -65,48 +65,6 @@ CS2800Users(){
 		#usermod -a -G sftponly $user
 		#/etc/ssh/sshd_config may have useful things
 		echo "Locking down sftp and ssh access for $user"
-		chown -R www-data /home/$user
-		chgrp -R $user /home/$user
-		chmod -R ug+rw /home/$user 
-		chmod -R o-rwx /home/$user
-		echo "Making it so permissions persist"
-		chmod -R ug+s /home/$user
-	done
-}
-
-CS3800Users(){
-	rm CS3800IDS.txt
-	#reads off from user file
-	USERS=$(cat $1)
-	instruct=starkey
-	ipasswd=clarks9gables
-	for user in $USERS
-	do
-  		#be sure to reconfigures separator characters if necessary
-		echo "Giving $user a random password"  		
-		password=$(python ./passwdgen.py)
-  		echo "Outputting to master list CS2800IDS.txt"
-		echo "$user - $password" >> CS3800IDS.txt
-  		#username:password:uid:gid:fullname:/home/dir:/bin/shell
-  		echo "$user:$password::::/home/$user:/bin/bash" > userfile
-		#newusers broke on batches, split into one at a time
-		$(newusers userfile)
-		echo "$user has been created.  Adding those with permissions to see all"
-		usermod -a -G $user $instruct
-		#htpasswd -b get passwd from cmd, -c to create first time in directory
-		echo "Creating .htpasswd"
-		mkdir /home/$user/html/
-		htpasswd -cb /home/$user/html/.htpasswd $user $password
-		htpasswd -b /home/$user/html/.htpasswd $instruct $ipasswd
-		echo "Creating .htaccess"
-		printf "AuthType Basic\nAuthName \"Restricted Content\"\nAuthUserFile /home/$user/html/.htpasswd\nRequire valid-user" > /home/$user/html/.htaccess
-		echo "Creating index.html in dir html for $user"
-		cp index.html /home/$user/html/index.html
-		#need good way to retrict to sftp only.  Students can ssh and sftp as of 2/3/2016		
-		#echo "Add $user to sftponly group"
-		#usermod -a -G sftponly $user
-		#/etc/ssh/sshd_config may have useful things
-		echo "Locking down sftp and ssh access for $user"		
 		chown -R www-data /home/$user
 		chgrp -R $user /home/$user
 		chmod -R ug+rw /home/$user 
