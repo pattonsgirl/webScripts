@@ -1,0 +1,18 @@
+master-usergen contains user generation scripts
+Course specific names are used as functions
+
+Required:
+index.html - this can be blank, but basically a default folder to put in each dir.  
+  Not necessary, but script does use it, and I use it to test things are working
+namefile.txt - can be any name - need to pass to user creator
+pwgen - apt-get install for ubuntu
+instructor account - needs to already be on the system
+
+Notes:
+Instructor username and password needs to be modified in the script to let them access student files and website
+Adds htaccess and htpasswd in directory html to lock down who can access a page (is set to just instructor and student)
+SFTP access is resricted to student and instructor
+
+
+Output:
+Text file with usernames and passwords separately by " - "
