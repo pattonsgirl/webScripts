@@ -89,7 +89,7 @@ createSingleUser(){
         fi
   	echo "$user:$password::::/home/$user:/bin/bash" > /tmp/userfile
 	$(newusers /tmp/userfile)
-        mkdir -v /home/$user/html/
+        mkdir /home/$user/html/
         htpasswd -cb /home/$user/html/.htpasswd $user $password
         printf "AuthType Basic\nAuthName \"Enter Twilight Zone\"\nAuthUserFile /home/$user/html/.htpasswd\nRequire user $user $instruct" > /home/$user/html/.htaccess
         itworks /home/$user/html/index.html
@@ -124,12 +124,10 @@ addInstruct(){
 }
 
 lockdownuser(){
-	echo "Locking down sftp and ssh access for $1"
 	chown -R www-data /home/$1
 	chgrp -R $1 /home/$1
 	chmod -R ug+rw /home/$1 
 	chmod -R o-rwx /home/$1
-	echo "Making it so permissions persist"
 	chmod -R ug+s /home/$1
 }
 
