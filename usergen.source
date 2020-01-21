@@ -54,12 +54,13 @@ studentAccounts(){
         read -p "Enter instructor password and press [ENTER]" instruct_pass
         ## check to see if instructor exists
         if [ ! -d /home/$instruct ]; then
-          read -p "Cannot find instructor user, create one? (Y/N): " create_instruct
-          if [[ $create_instruct == [yY] || $create_instruct == [yY][eE][sS] ]]; then
-            createSingleUser $instruct $instruct_pass
-          else
-            echo "No instructor account found, exiting."
-            exit 1
+            read -p "Cannot find instructor user, create one? (Y/N): " create_instruct
+            if [[ $create_instruct == [yY] || $create_instruct == [yY][eE][sS] ]]; then
+                createSingleUser $instruct $instruct_pass
+            else
+                echo "No instructor account found, exiting."
+                exit 1
+            fi
         fi
 
 	for user in $USERS
