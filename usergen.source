@@ -11,13 +11,15 @@ fi
 command -v pwgen >/dev/null 2>&1 || { echo >&2 "I require pwgen but it's not installed.  Aborting."; exit 1; }
 
 echo -e "\n\n"
-echo "1. Add instructor account(s) first"
-echo "2. To use commands in script, source it with . usergen.source"
+echo "To use commands in script, source it with:
+$ . usergen.source
+OR
+$ source usergen.source"
 echo -e "\n\n"
 echo "Functions provided by this file:"
-echo "studentAccounts file_name.txt 	- Creates account based on list.  Add instructors with addInstruct"
-echo "createSingleUser 			- Creates a single user.  Provide username after command"
-echo "INSTRUCT_ACCT 			- Create files for instructor account.  Provide username and password after command"
+echo "studentAccounts file_name.txt 	- Creates account based on list.  Add instructor with access to student accounts"
+echo 'createSingleUser 			- Creates a single user.  Username specified as $1 and password specified with $2'
+echo '                                    If no user/password provided it will prompt for input.'
 echo "addInstruct file_name.txt 	- Add an instructor account.  Provide instructor username after command"
 echo "removeList file_name.txt 		- Users in file and their directories will be removed"
 echo "removeUSER 			- Removes a single user.  Provide username after command"
@@ -47,21 +49,39 @@ itworks(){
 
 studentAccounts(){
 	USERS=$(cat $1)
-	read -p  "Enter file name to save IDs and press [ENTER]:" filename
+	read -p "Enter file name to save IDs and press [ENTER]:" filename
+        read -p "Enter username for instructor and press [ENTER]:" instruct
+        read -p "Enter instructor password and press [ENTER]" instruct_pass
+        ## check to see if instructor exists
+        if [ ! -d /home/$instruct ]; then
+          read -p "Cannot find instructor user, create one? (Y/N): " create_instruct
+          if [[ $create_instruct == [yY] || $create_instruct == [yY][eE][sS] ]]; then
+            createSingleUser $instruct $instruct_pass
+          else
+            echo "No instructor account found, exiting."
+            exit 1
+        fi
+
 	for user in $USERS
 	do
 		echo "Creating $user"
 	        createSingleUser $user >> $filename
+                
+                ## give instructor permissions to student account
+                usermod -a -G $user $instruct
+                htpasswd -b /home/$user/html/.htpasswd $instruct $instruct_pass
+		echo -n " $instruct" >> /home/$user/html/.htaccess
         done
+
 }
 
 createSingleUser(){
-        if [ "$#" -ne 1 ]; then
+        if [ "$#" -lt 1 ]; then
                 read -p "Enter student name and press [ENTER]: " user
         else
                 user=$1
         fi
-        if [ "$#" -ne 2 ]; then
+        if [ "$#" -lt 2 ]; then
                 password=$(pwgen -v 5 1)
         else
                 password=$2
@@ -74,36 +94,29 @@ createSingleUser(){
         itworks /home/$user/html/index.html
         lockdownuser $user
         echo "$user - $password"
-}
-
-INSTRUCT_ACCT(){
-        read -p "Enter instructor name and press [ENTER]" instruct
-        read -p "Enter instructor password and press [ENTER]" instruct_pass
-        echo "Creating .htpasswd"
-        mkdir -v /home/$instruct/html/
-        htpasswd -cb /home/$instruct/html/.htpasswd $instruct $instruct_pass
-        echo "Creating .htaccess"
-        #password protection to restrict to just that user and instructor
-        printf "AuthType Basic\nAuthName \"Enter Twilight Zone\"\nAuthUserFile /home/$instruct/html/.htpasswd\nRequire user $instruct" > /home/$instruct/html/.htaccess
-        echo "Creating index.html in dir html for $instruct"
-        itworks /home/$instruct/html/index.html
-        lockdownuser $instruct
+        rm /tmp/userfile
 }
 
 
 addInstruct(){
-        #reads off from user file
         USERS=$(cat $1)
         read -p "Enter instructor name and press [ENTER]" instruct
 	read -p "Enter instructor password and press [ENTER]" instruct_pass
+        ## check to see if instructor exists
+        if [ ! -d /home/$instruct ]; then
+          read -p "Cannot find instructor user, create one? (Y/N): " create_instruct
+          if [[ $create_instruct == [yY] || $create_instruct == [yY][eE][sS] ]]; then
+            createSingleUser $instruct $instruct_pass
+          else
+            echo "No instructor account found, exiting."
+            exit 1
+        fi
+
         echo "$instruct - $instruct_pass"
         for user in $USERS
         do
-                echo "$user exists - adding TA"
                 usermod -a -G $user $instruct
                 htpasswd -b /home/$user/html/.htpasswd $instruct $instruct_pass
-                echo "Fixing .htaccess"
-                #password protection to restrict to just that user and instructor
 		echo -n " $instruct" >> /home/$user/html/.htaccess
         done
 }
@@ -122,16 +135,17 @@ removeList(){
  	USERS=$(cat $1)
  	for user in $USERS
  	do
- 		deluser --quiet $user
- 		delgroup $user
- 		rm -R /home/$user
+          removeUSER $user
  	done
  	echo "REMINDER: Remove User ID list"
 }
 
 removeUSER(){
- 	echo -n "Enter name of user to REMOVE and press [ENTER]: "
-	read user
+        if [ "$#" -lt 1 ]; then
+                read -p "Enter student name and press [ENTER]: " user
+        else
+                user=$1
+        fi
  	deluser --quiet $user
  	delgroup $user
  	rm -R /home/$user
