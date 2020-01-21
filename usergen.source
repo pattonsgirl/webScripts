@@ -137,7 +137,6 @@ removeList(){
  	do
           removeUSER $user
  	done
- 	echo "REMINDER: Remove User ID list"
 }
 
 removeUSER(){
