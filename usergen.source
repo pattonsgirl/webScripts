@@ -20,9 +20,9 @@ echo "Functions provided by this file:"
 echo "studentAccounts file_name.txt     - Creates account based on list.  Add instructor with access to student accounts"
 echo 'createSingleUser                  - Creates a single user.  Username specified as $1 and password specified with $2'
 echo '                                    If no user/password provided it will prompt for input.'
-echo "addInstruct file_name.txt 	- Add an instructor account.  Provide instructor username after command"
+echo "addInstruct file_name.txt         - Add an instructor account.  Provide instructor username after command"
 echo "removeList file_name.txt          - Users in file and their directories will be removed"
-echo "removeUSER 			- Removes a single user.  Provide username after command"
+echo "removeUSER                        - Removes a single user.  Provide username after command"
 echo -e "\n\n"
 
 
