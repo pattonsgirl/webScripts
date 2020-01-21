@@ -1,4 +1,5 @@
-This repo creates webAccounts on a standard Apache server.
+This repo creates webAccounts on a standard Apache server.  
+Accounts created with this script lock access between the students, but allow for instructors / tas to gain access to the student directories for grading purposes.  To protect student integrity, the browser rendered webpages are account locked by using `.htaccess` and `.htpasswd`
 
 * `build-notes.md` contains references for server configuration that the account creation scripts are based on.
 * `pwgen` is a package used by this script for password generation.
@@ -11,20 +12,26 @@ Type `. master-usergen-v2.sh` to load the functions into bash.
 
 To create new accounts based on a list:  
 `studentAccounts namefile.txt`  
+You will be prompted to enter an ouput filename.
 This creates the user accounts only.  
 
-Individual instructor / TA accounts need to be made with `adduser`.  To create a web account for them similar to the student accounts:
-`INSTRUCT_ACCT`  You will then be prompted for an instructor name and password
+To create a new account for a single user:
+`singleUser`  
+You will be prompted for a user name.  The password will be randomly generated.  You will be prompted for an output filename.
 
-To give instructors / TAs access to the student accounts:
-`addInstruct namefile.txt`
+TODO: add functionality to add instructors / TAs for a single user.
 
+Individual instructor / TA accounts need to be made with `adduser`.  To create a web account for them similar to the student accounts:  
+`INSTRUCT_ACCT`  
+You will then be prompted for an instructor name and password
 
-Notes:
-Instructor username and password needs to be modified in the script to let them access student files and website
-Adds htaccess and htpasswd in directory html to lock down who can access a page (is set to just instructor and student)
-SFTP access is resricted to student and instructor
+To give instructors / TAs access to the student accounts:  
+`addInstruct namefile.txt`  
+You will then be prompted for an instructor / TA username and password
 
+To clean up users in bulk:  
+`removeList namefile.txt`
 
-Output:
-Text file with usernames and passwords separately by " - "
+To remove a single user:  
+`removeUser`  
+You will then be prompted for the name of the user to be deleted.
