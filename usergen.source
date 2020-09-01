@@ -140,12 +140,14 @@ removeList(){
 }
 
 removeUSER(){
+	echo "warn: instructor manually set to starkey"
         if [ "$#" -lt 1 ]; then
                 read -p "Enter student name and press [ENTER]: " user
         else
                 user=$1
         fi
  	deluser --quiet $user
- 	delgroup $user
+ 	gpasswd -d starkey $user
+	delgroup $user
  	rm -R /home/$user
 }
